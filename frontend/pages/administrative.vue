@@ -1,0 +1,3 @@
+<template>
+  <AdministrativeTasks />
+</template>

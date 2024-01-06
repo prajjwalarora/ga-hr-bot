@@ -1,0 +1,72 @@
+version: "3.4"
+
+services:
+  builder:
+    container_name: builder
+    image: apitest
+    env_file:
+      - ./env/builder.env
+    build:
+      context: ./builder
+      dockerfile: Dockerfile
+    volumes:
+      - "./builder/:/app/"
+      - "./assets/:/app/assets"
+    ports:
+      - 6000:6000
+
+  backend:
+    container_name: backend
+    depends_on:
+      - builder
+    env_file:
+      - ./env/backend.env
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - "./backend:/app/"
+      - /app/node_modules
+    ports:
+      - 7000:7000
+
+  frontend:
+    container_name: frontend
+    env_file:
+      - ./env/frontend.env
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - "./frontend:/app/"
+      - /app/node_modules
+    ports:
+      - 3000:3000
+      - 24678:24678
+
+  db:
+    container_name: "database"
+    build:
+      context: ./database/Docker
+      dockerfile: db.Dockerfile
+    restart: always
+    environment:
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    volumes:
+      - ./database/var/pgdata:/var/lib/postgresql/data
+      - ./database/sql/:/app/sql
+
+    ports:
+      - "5433:5432"
+
+  graphql-engine:
+    container_name: "graphql"
+    image: hasura/graphql-engine:v2.20.0
+    env_file:
+      - ./env/hasura.env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - "db"
+    restart: always

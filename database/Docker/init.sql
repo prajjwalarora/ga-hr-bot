@@ -1,0 +1,6 @@
+CREATE USER pgadmin SUPERUSER;
+
+CREATE DATABASE employeemanagement;
+GRANT ALL PRIVILEGES ON DATABASE employeemanagement TO pgadmin;
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
